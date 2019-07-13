@@ -632,8 +632,9 @@ function genGrid(nets=[:enet,:kmnet,:dnet,:rnet];K=[4,8,16,32],
     for reftype in reftypes for dc in distancesk for net in nets 
     for training in trainings 
     if  net!=:kmnet || reftype!=:centers || (net==:kmnet && dc==:squared_l2_distance)]
-    if length(space)>sample_size && sample_size!=-1
-        space=space[Random.randperm(length(space))[1:sample_size]]
+    sz = sample_size%2==1 ? trunc(Int,sample_size/2)+1 : sample_size/2
+    if length(space)>sz && sample_size!=-1
+        space=space[Random.randperm(length(space))[1:sz]]
     end
     space
 end
@@ -644,13 +645,10 @@ function inductive(Xe,Ye,k,nettype,kernel,distancek,reftype,classifier;
     test_set=false)
     ms = pyimport("sklearn.model_selection")
     skf=ms.StratifiedKFold(n_splits=folds,shuffle=true)
-    #skf[:get_n_splits](Xe,Ye)
     skf.get_n_splits(Xe,Ye)
     clf,clt,distt,wt=classifier
     y_pred=[]
     yr=[]
-    #@show k,nettype,kernel,distancek,reftype,classifier,length(Xe),clt,distt,wt
-    #for (ei,vi) in skf.split[:split](Xe,Ye)
     for (ei,vi) in skf.split(Xe,Ye)
         ei,vi=ei.+1,vi.+1
         xt,xv=Xe[ei],Xe[vi]
@@ -661,17 +659,14 @@ function inductive(Xe,Ye,k,nettype,kernel,distancek,reftype,classifier;
         eval(nettype)(N,k,kernel=eval(kernel),distance=distancek,reftype=reftype,per_class=per_class)
         Xt=gen_features(xt,N)
         Xv=gen_features(xv,N)
-        #clf[:fit](Xt,yt)
         clf.fit(Xt,yt)
         yr=vcat(yr,yv)
-        #y_pred=vcat(y_pred,clf[:predict](Xv)[:,1])
         y_pred=vcat(y_pred,clf.predict(Xv)[:,1])
     end
     opval=eval(op_function)(yr,y_pred)
     Nf=Net(Xe,Ye)
     eval(nettype)(Nf,k,kernel=eval(kernel),distance=distancek,reftype=reftype,per_class=per_class)
     X=gen_features(Xe,Nf)
-    #clf[:fit](X,Ye)
     clf.fit(X,Ye)
     trainratio=1
     traintype="KFolds"
@@ -683,13 +678,13 @@ end
 
 function KMS(Xe,Ye; op_function=:recall,top_k=25,folds=3,per_class=false, udata=[],
     nets=[:enet,:kmnet,:dnet,:rnet],K=[4,8,16,32,64],distances=[:angle,:squared_l2_distance],
-    distancesk=[:angle,:squared_l2_distance],sample_size=64,
-    kernels=[:gaussian,:linear,:cauchy,:sigmoid],test_set=false)
+    distancesk=[:angle,:squared_l2_distance],sample_size=128,
+    kernels=[:gaussian,:linear,:cauchy,:sigmoid],test_set=false, debug=false)
     DNNC=Dict()
     space=genGrid(nets,K=K,kernels=kernels,distancesk=distancesk,sample_size=sample_size,distances=distances)
     #@show space[1]
     i=1
-    @show length(space)
+    @show length(space),sample_size
     Top=Vector{Tuple{Float64,String}}(undef, 0)
     nb=pyimport("sklearn.naive_bayes")
     for (k,kernel,reftype,distancek,nettype,training) in space
@@ -711,7 +706,9 @@ function KMS(Xe,Ye; op_function=:recall,top_k=25,folds=3,per_class=false, udata=
             end
         end
         push!(Top,(opval,ckey))
-        @show (opval,ckey)
+        if debug
+            @show (debug, opval,ckey)
+        end
         DNNC[ckey]=(cl,net)
     end
     sort!(Top,rev=true)
