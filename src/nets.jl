@@ -676,7 +676,7 @@ function inductive(Xe,Ye,k,nettype,kernel,distancek,reftype,classifier;
 end
 
 
-function KMS(Xe,Ye; op_function=:recall,top_k=25,folds=3,per_class=false, udata=[],
+function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=[],
     nets=[:enet,:kmnet,:dnet,:rnet],K=[4,8,16,32,64],distances=[:angle,:squared_l2_distance],
     distancesk=[:angle,:squared_l2_distance],sample_size=128,
     kernels=[:gaussian,:linear,:cauchy,:sigmoid],test_set=false, debug=false)
@@ -684,7 +684,7 @@ function KMS(Xe,Ye; op_function=:recall,top_k=25,folds=3,per_class=false, udata=
     space=genGrid(nets,K=K,kernels=kernels,distancesk=distancesk,sample_size=sample_size,distances=distances)
     #@show space[1]
     i=1
-    @show length(space),sample_size
+    #@show length(space),sample_size
     Top=Vector{Tuple{Float64,String}}(undef, 0)
     nb=pyimport("sklearn.naive_bayes")
     for (k,kernel,reftype,distancek,nettype,training) in space
