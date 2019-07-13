@@ -19,5 +19,5 @@ include("cv.jl")
 include("kernels.jl")
 include("supervised.jl")
 include("kmap/kmap.jl")
-# include("nets.jl")
+include("nets.jl")
 end
