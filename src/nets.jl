@@ -632,7 +632,7 @@ function genGrid(nets=[:enet,:kmnet,:dnet,:rnet];K=[4,8,16,32],
     for reftype in reftypes for dc in distancesk for net in nets 
     for training in trainings 
     if  net!=:kmnet || reftype!=:centers || (net==:kmnet && dc==:squared_l2_distance)]
-    sz = sample_size%2==1 ? trunc(Int,sample_size/2)+1 : sample_size/2
+    sz = sample_size%2==1 ? trunc(Int,sample_size/2)+1 : trunc(Int,sample_size/2)
     if length(space)>sz && sample_size!=-1
         space=space[Random.randperm(length(space))[1:sz]]
     end
