@@ -614,7 +614,7 @@ function genCl()
 end
 
 
-function genGrid(nets=[:fft_sampling(,:kmeans_sampling,:density_sampling,:random_sampling];K=[4,8,16,32],
+function genGrid(nets=[:fft_sampling,:kmeans_sampling,:density_sampling,:random_sampling];K=[4,8,16,32],
     trainings=[:inductive],#,:ktransductive],#traintypes=[:KFoldsTrain],
     kernels=[:gaussian,:sigmoid,:linear,:cauchy],
     reftypes=[:centers,:centroids],
