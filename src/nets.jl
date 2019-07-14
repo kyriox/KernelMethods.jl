@@ -676,7 +676,7 @@ end
 
 
 function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=[],
-    nets=[:enet,:kmeans_sampling,:density_sampling,:random_sampling],K=[4,8,16,32,64],distances=[:angle,:squared_l2_distance],
+    nets=[:fft_sampling,:kmeans_sampling,:density_sampling,:random_sampling],K=[4,8,16,32,64],distances=[:angle,:squared_l2_distance],
     distancesk=[:angle,:squared_l2_distance],sample_size=128,
     kernels=[:gaussian,:linear,:cauchy,:sigmoid],test_set=false, debug=false)
     DNNC=Dict()
