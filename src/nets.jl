@@ -13,7 +13,7 @@
 # limitations under the License.
 
 #module Nets
-export Net, enet, kmnet, dnet, rnet, gen_features, KMS
+export Net, fft_sampling, kmeans_sampling, density_sampling, random_sampling, gen_features, KMS
 #import KernelMethods.Kernels: sigmoid, gaussian, linear, cauchy, poly, quadratic
 using KernelMethods: accuracy, recall, f1
 #import KernelMethods.Supervised: NearNeighborClassifier, optimize!, predict_one, predict_one_proba
@@ -186,7 +186,7 @@ function to_column(data)
 end
 
 # Epsilon Network using farthest first traversal Algorithm
-function enet(N,num_of_centers::Int; distance=:squared_l2_distance, axis=1,
+function fft_sampling(N,num_of_centers::Int; distance=:squared_l2_distance, axis=1,
     per_class=false,reftype=:centroids, kernel=linear,test_set=false,)
     N.distance=distance
     N.kernel=kernel
@@ -344,7 +344,7 @@ end
 
 #Feature generator using kmeans centroids
 
-function kmnet(N,num_of_centers::Int; max_iter=1000,kernel=linear,distance=:squared_l2_distance,reftype=:centroids, per_class=false,test_set=false)
+function kmeans_sampling(N,num_of_centers::Int; max_iter=1000,kernel=linear,distance=:squared_l2_distance,reftype=:centroids, per_class=false,test_set=false)
     #n=length(N.data)
     fdata=N.data[:]
     #if !per_class
@@ -379,7 +379,7 @@ end
 
 #References selection using naive algoritmh for density net
 
-function dnet(N,num_of_elements::Int64; distance=:squared_l2_distance,kernel=linear,reftype=:centroids,per_class=false, test_set=false)
+function density_sampling(N,num_of_elements::Int64; distance=:squared_l2_distance,kernel=linear,reftype=:centroids,per_class=false, test_set=false)
     N.distance=distance
     #if N.sparse
     #    data=N.vbows
@@ -418,7 +418,7 @@ function dnet(N,num_of_elements::Int64; distance=:squared_l2_distance,kernel=lin
 end
 
 # Select references randomly
-function rnet(N,num_of_elements::Int64; distance=:squared_l2_distance,kernel=linear,reftype=:centroids, per_class=false,
+function random_sampling(N,num_of_elements::Int64; distance=:squared_l2_distance,kernel=linear,reftype=:centroids, per_class=false,
     test_set=false)
     N.distance=distance
     #if N.sparse
@@ -614,7 +614,7 @@ function genCl()
 end
 
 
-function genGrid(nets=[:enet,:kmnet,:dnet,:rnet];K=[4,8,16,32],
+function genGrid(nets=[:fft_sampling(,:kmeans_sampling,:density_sampling,:random_sampling];K=[4,8,16,32],
     trainings=[:inductive],#,:ktransductive],#traintypes=[:KFoldsTrain],
     kernels=[:gaussian,:sigmoid,:linear,:cauchy],
     reftypes=[:centers,:centroids],
@@ -622,16 +622,15 @@ function genGrid(nets=[:enet,:kmnet,:dnet,:rnet];K=[4,8,16,32],
     distancesk=[:angle,:squared_l2_distance],
     #trainratios=[1],
     sample_size=128)
-    #nets=[:enet,:kmnet,:dnet,:rnet]
     #clfs=genCl()
-    if length(nets)==1 && nets[1]==:kmnet
+    if length(nets)==1 && nets[1]==:kmeans_sampling
         reftypes=[:centroids]
         distancesk=[:squared_l2_distance] 
     end
     space=[(k,kernel,reftype,dc,net,training) for k in K  for kernel in kernels 
     for reftype in reftypes for dc in distancesk for net in nets 
     for training in trainings 
-    if  net!=:kmnet || reftype!=:centers || (net==:kmnet && dc==:squared_l2_distance)]
+    if  net!=:kmeans_sampling || reftype!=:centers || (net==:kmeans_sampling && dc==:squared_l2_distance)]
     sz = sample_size%2==1 ? trunc(Int,sample_size/2)+1 : trunc(Int,sample_size/2)
     if length(space)>sz && sample_size!=-1
         space=space[Random.randperm(length(space))[1:sz]]
@@ -677,7 +676,7 @@ end
 
 
 function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=[],
-    nets=[:enet,:kmnet,:dnet,:rnet],K=[4,8,16,32,64],distances=[:angle,:squared_l2_distance],
+    nets=[:enet,:kmeans_sampling,:density_sampling,:random_sampling],K=[4,8,16,32,64],distances=[:angle,:squared_l2_distance],
     distancesk=[:angle,:squared_l2_distance],sample_size=128,
     kernels=[:gaussian,:linear,:cauchy,:sigmoid],test_set=false, debug=false)
     DNNC=Dict()
