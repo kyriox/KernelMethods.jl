@@ -262,6 +262,7 @@ function kmpp(N,num_of_centers::Int)::Vector{Int}
     [push!(fdata,ud) for ud in N.udata];
     #end
     n=length(fdata)
+    #partitions=[0 for i in 1:n]
     #n=length(N.data)
     s=rand(1:n)
     centers,d=Vector{Int}(undef,num_of_centers),squared_l2_distance
@@ -282,6 +283,7 @@ function kmpp(N,num_of_centers::Int)::Vector{Int}
             end
         end
     end
+    #assign(fdata,fdata[centers],partitions;distance=N.distance)
     centers
 end
 
@@ -370,6 +372,7 @@ function kmeans_sampling(N,num_of_centers::Int; max_iter=1000,kernel=linear,dist
     N.partitions,N.dists=partitions,dists
     N.centroids,N.sigmas[0]=centroids,maximum(N.dists)
     #N.csigmas,N.stats=get_csigmas(N.data,N.centroids,N.partitions,distance=N.distance)
+    N.centers=init
     N.csigmas,N.stats=get_csigmas(fdata,N.centroids,N.partitions,distance=N.distance)
     N.sigmas[0]=maximum(N.csigmas)
     N.reftype=:centroids
@@ -615,7 +618,7 @@ end
 
 
 function genGrid(nets=[:fft_sampling,:kmeans_sampling,:density_sampling,:random_sampling];K=[4,8,16,32],
-    trainings=[:inductive],#,:ktransductive],#traintypes=[:KFoldsTrain],
+    trainings=[:inductive],
     kernels=[:gaussian,:sigmoid,:linear,:cauchy],
     reftypes=[:centers,:centroids],
     distances=[:angle,:squared_l2_distance],
@@ -630,7 +633,8 @@ function genGrid(nets=[:fft_sampling,:kmeans_sampling,:density_sampling,:random_
     space=[(k,kernel,reftype,dc,net,training) for k in K  for kernel in kernels 
     for reftype in reftypes for dc in distancesk for net in nets 
     for training in trainings 
-    if  net!=:kmeans_sampling || reftype!=:centers || (net==:kmeans_sampling && dc==:squared_l2_distance)]
+    if  !(net==:kmeans_sampling  && dc==:angle)]
+    #if  net!=:kmeans_sampling || reftype!=:centers || (net==:kmeans_sampling && dc==:squared_l2_distance)]
     sz = sample_size%2==1 ? trunc(Int,sample_size/2)+1 : trunc(Int,sample_size/2)
     if length(space)>sz && sample_size!=-1
         space=space[Random.randperm(length(space))[1:sz]]
