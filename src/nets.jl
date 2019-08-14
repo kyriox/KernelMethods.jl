@@ -613,7 +613,8 @@ function genCl()
             end
         end
     end
-    return clfs
+    clf_list=[clfs[Random.randperm(length(clf_list))][1], (GaussianNB(),"NaiveBayes","ND","NA")]
+    return clfs_list[Random.randperm(length(clf_list))][1]
 end
 
 
@@ -630,13 +631,13 @@ function genGrid(nets=[:fft_sampling,:kmeans_sampling,:density_sampling,:random_
         reftypes=[:centroids]
         distancesk=[:squared_l2_distance] 
     end
-    space=[(k,kernel,reftype,dc,net,training) for k in K  for kernel in kernels 
+    space=[(k,kernel,reftype,dc,net,training,genCl()) for k in K  for kernel in kernels 
     for reftype in reftypes for dc in distancesk for net in nets 
     for training in trainings 
     if  !(net==:kmeans_sampling  && dc==:angle)]
     #if  net!=:kmeans_sampling || reftype!=:centers || (net==:kmeans_sampling && dc==:squared_l2_distance)]
-    sz = sample_size%2==1 ? trunc(Int,sample_size/2)+1 : trunc(Int,sample_size/2)
-    if length(space)>sz && sample_size!=-1
+    #sz = sample_size%2==1 ? trunc(Int,sample_size/2)+1 : trunc(Int,sample_size/2)
+    if length(space)>sz #&& sample_size!=-1
         space=space[Random.randperm(length(space))[1:sz]]
     end
     space
@@ -678,6 +679,9 @@ function inductive(Xe,Ye,k,nettype,kernel,distancek,reftype,classifier;
     #return (clfr,opval,cltr,disttr,wtr)
 end
 
+function eval_conf(conf)
+
+end
 
 function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=[],
     nets=[:fft_sampling,:kmeans_sampling,:density_sampling,:random_sampling],K=[4,8,16,32,64],distances=[:angle,:squared_l2_distance],
@@ -690,30 +694,40 @@ function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=
     #@show length(space),sample_size
     Top=Vector{Tuple{Float64,String}}(undef, 0)
     nb=pyimport("sklearn.naive_bayes")
-    for (k,kernel,reftype,distancek,nettype,training) in space
-        clf_list=genCl()
-        if sample_size!=-1
-            clf_list=[clf_list[Random.randperm(length(clf_list))][1]]
-        end
-        push!(clf_list,(nb.GaussianNB(),"NaiveBayes","ND","NA"))
-        #@show(length(space)*length(clf_list))
-        cl,net,opval,ckey=nothing,nothing,0,""
-        clf_list
-        for clfc in clf_list
-            cln,dkn,cldn=clfc[2],clfc[3],clfc[4]
-            (cli,neti),(opvali,ckeyi)=eval(training)(Xe,Ye,k,nettype,kernel,distancek,reftype,clfc;
-            folds=folds,udata=udata, 
-            op_function=op_function, per_class=per_class,test_set=test_set)
-            if opvali>opval
-                (cl,net),(opval,ckey)=(cli,neti),(opvali,ckeyi)
-            end
-        end
+    for (k,kernel,reftype,distancek,nettype,training,clfc) in space
+        cln,dkn,cldn=clfc[2],clfc[3],clfc[4]
+        (cli,neti),(opvali,ckeyi)=eval(training)(Xe,Ye,k,nettype,kernel,distancek,reftype,
+        clfc; folds=folds,udata=udata, op_function=op_function, per_class=per_class,test_set=test_set)
         push!(Top,(opval,ckey))
         if debug
             @show (debug, opval,ckey)
         end
         DNNC[ckey]=(cl,net)
-    end
+    end   
+    #for (k,kernel,reftype,distancek,nettype,training) in space
+    #    clf_list=genCl()
+    #    if sample_size!=-1
+    #        clf_list=[clf_list[Random.randperm(length(clf_list))][1]]
+    #    end
+    #    #push!(clf_list,(nb.GaussianNB(),"NaiveBayes","ND","NA"))
+    #    #@show(length(space)*length(clf_list))
+    #    cl,net,opval,ckey=nothing,nothing,0,""
+    #    clf_list
+    #    for clfc in clf_list
+    #       cln,dkn,cldn=clfc[2],clfc[3],clfc[4]
+    #        (cli,neti),(opvali,ckeyi)=eval(training)(Xe,Ye,k,nettype,kernel,distancek,reftype,clfc;
+    #        folds=folds,udata=udata, 
+    #        op_function=op_function, per_class=per_class,test_set=test_set)
+    #        if opvali>opval
+    #            (cl,net),(opval,ckey)=(cli,neti),(opvali,ckeyi)
+    #        end
+    #    end
+    #    push!(Top,(opval,ckey))
+    #    if debug
+    #        @show (debug, opval,ckey)
+    #    end
+    #    DNNC[ckey]=(cl,net)
+    #end
     sort!(Top,rev=true)
     Top=Top[1:top_k]
     [(DNNC[top[2]],top[1],top[2]) for top in Top]
