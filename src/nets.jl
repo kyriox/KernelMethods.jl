@@ -633,7 +633,7 @@ function genGrid(nets=[:fft_sampling,:kmeans_sampling,:density_sampling,:random_
         reftypes=[:centroids]
         distancesk=[:squared_l2_distance] 
     end
-    space=[(k=k,kernel=kernel,reftype=reftype,distancek=dc,net=net,training=training,cl=genCl()) for k in K  for kernel in kernels 
+    space=[(k=k,kernel=kernel,reftype=reftype,distancek=dc,nettype=net,training=training,cl=genCl()) for k in K  for kernel in kernels 
     for reftype in reftypes for dc in distancesk for net in nets 
     for training in trainings 
     if  !(net==:kmeans_sampling  && dc==:angle)]
