@@ -600,6 +600,7 @@ function genCl()
     W=["uniform","distance"]
     clfs=[]
     nn=pyimport("sklearn.neighbors")
+    nb=pyimport("sklearn.naive_bayes")
     for d in D
         for w in W
             for k in K
@@ -693,7 +694,6 @@ function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=
     i=1
     #@show length(space),sample_size
     Top=Vector{Tuple{Float64,String}}(undef, 0)
-    nb=pyimport("sklearn.naive_bayes")
     for (k,kernel,reftype,distancek,nettype,training,clfc) in space
         cln,dkn,cldn=clfc[2],clfc[3],clfc[4]
         (cli,neti),(opvali,ckeyi)=eval(training)(Xe,Ye,k,nettype,kernel,distancek,reftype,
