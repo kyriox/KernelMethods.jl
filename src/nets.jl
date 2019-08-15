@@ -680,30 +680,36 @@ function inductive(Xe,Ye,k,nettype,kernel,distancek,reftype,classifier;
     #return (clfr,opval,cltr,disttr,wtr)
 end
 
-function eval_conf(conf)
-
+function eval_conf(args)
+    conf,op_function,Xe,Ye,per_class,test_set,folds,udata=args
+    k,nettype,kernel,distancek,reftype,clfc=conf
+    (cli,neti),(opvali,ckeyi) = eval(training)(Xe,Ye,k,nettype,kernel,distancek,reftype,
+    clfc, folds=folds,udata=udata, op_function=op_function, per_class=per_class,test_set=test_set)
+    (cl=cli, net=neti, opval=opvali, ckey=ckeyi)
 end
 
 function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=[],
     nets=[:fft_sampling,:kmeans_sampling,:density_sampling,:random_sampling],K=[4,8,16,32,64],distances=[:angle,:squared_l2_distance],
     distancesk=[:angle,:squared_l2_distance],sample_size=128,
     kernels=[:gaussian,:linear,:cauchy,:sigmoid],test_set=false, debug=false)
-    DNNC=Dict()
+    #DNNC=Dict()
     space=genGrid(nets,K=K,kernels=kernels,distancesk=distancesk,sample_size=sample_size,distances=distances)
-    #@show space[1]
-    i=1
-    #@show length(space),sample_size
-    Top=Vector{Tuple{Float64,String}}(undef, 0)
-    for (k,kernel,reftype,distancek,nettype,training,clfc) in space
-        cln,dkn,cldn=clfc[2],clfc[3],clfc[4]
-        (cli,neti),(opvali,ckeyi)=eval(training)(Xe,Ye,k,nettype,kernel,distancek,reftype,
-        clfc; folds=folds,udata=udata, op_function=op_function, per_class=per_class,test_set=test_set)
-        push!(Top,(opvali,ckeyi))
-        if debug
-            @show (debug, opvali,ckeyi)
-        end
-        DNNC[ckeyi]=(cli,neti)
-    end   
+    space=[(conf,op_function,Xe,Ye,per_class,test_set,folds,udata) for conf in space]
+    res=pmap(eval_conf, space)
+    sort!(res, by=x->x.opval, rev=true)
+    res[1:top_k]
+    #(cli,neti),(opvali,ckeyi)=
+    #Top=Vector{Tuple{Float64,String}}(undef, 0)
+    #for (k,kernel,reftype,distancek,nettype,training,clfc) in space
+        #cln,dkn,cldn=clfc[2],clfc[3],clfc[4]
+    #    (cli,neti),(opvali,ckeyi)=eval(training)(Xe,Ye,k,nettype,kernel,distancek,reftype,
+    #    clfc; folds=folds,udata=udata, op_function=op_function, per_class=per_class,test_set=test_set)
+    #    push!(Top,(opvali,ckeyi))
+    #    if debug
+    #        @show (debug, opvali,ckeyi)
+    #    end
+    #    DNNC[ckeyi]=(cli,neti)
+    #end   
     #for (k,kernel,reftype,distancek,nettype,training) in space
     #    clf_list=genCl()
     #    if sample_size!=-1
@@ -728,9 +734,9 @@ function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=
     #    end
     #    DNNC[ckey]=(cl,net)
     #end
-    sort!(Top,rev=true)
-    Top=Top[1:top_k]
-    [(DNNC[top[2]],top[1],top[2]) for top in Top]
+    #sort!(Top,rev=true)
+    #Top=Top[1:top_k]
+    #[(DNNC[top[2]],top[1],top[2]) for top in Top]
 end
 
 
@@ -780,7 +786,7 @@ end
 function predict(knc,X;ensemble_k=1)
     y_t=Vector{Int}(undef, 0)
     for i in 1:ensemble_k
-        kc,opv,desc=knc[i]
+        kc,opv,desc=knc[i].cl,knc[i].opval, knc[i].ckey
         cl,N=kc
         xv=gen_features(X,N)       
         #if contains(desc,"KNN")  
