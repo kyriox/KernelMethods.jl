@@ -23,6 +23,7 @@ using PyCall
 import PyCall: PyObject, pyimport
 using StatsBase
 using Random
+using Distributed
 
 #nb=pyimport("sklearn.naive_bayes")
 #nn=pyimport("sklearn.neighbors")
@@ -632,7 +633,7 @@ function genGrid(nets=[:fft_sampling,:kmeans_sampling,:density_sampling,:random_
         reftypes=[:centroids]
         distancesk=[:squared_l2_distance] 
     end
-    space=[(k,kernel,reftype,dc,net,training,genCl()) for k in K  for kernel in kernels 
+    space=[(k=k,kernel=kernel,reftype=reftype,distancek=dc,net=net,training=training,cl=genCl()) for k in K  for kernel in kernels 
     for reftype in reftypes for dc in distancesk for net in nets 
     for training in trainings 
     if  !(net==:kmeans_sampling  && dc==:angle)]
@@ -681,10 +682,9 @@ function inductive(Xe,Ye,k,nettype,kernel,distancek,reftype,classifier;
 end
 
 function eval_conf(args)
-    conf,op_function,Xe,Ye,per_class,test_set,folds,udata=args
-    k,nettype,kernel,distancek,reftype,clfc=conf
-    (cli,neti),(opvali,ckeyi) = eval(training)(Xe,Ye,k,nettype,kernel,distancek,reftype,
-    clfc, folds=folds,udata=udata, op_function=op_function, per_class=per_class,test_set=test_set)
+    c,op_function,Xe,Ye,per_class,test_set,folds,udata=args
+    (cli,neti),(opvali,ckeyi) = eval(training)(Xe,Ye,k,c.nettype,c.kernel,c.distancek,c.reftype,
+    c.clfc, folds=folds,udata=udata, op_function=op_function, per_class=per_class,test_set=test_set)
     (cl=cli, net=neti, opval=opvali, ckey=ckeyi)
 end
 
@@ -785,9 +785,11 @@ end
 
 function predict(knc,X;ensemble_k=1)
     y_t=Vector{Int}(undef, 0)
+    #@show length(knc)
     for i in 1:ensemble_k
-        kc,opv,desc=knc[i].cl,knc[i].opval, knc[i].ckey
-        cl,N=kc
+        #kc,opv,desc=knc[i].cl,knc[i].opval, knc[i].ckey
+        #cl,N=kc
+        cl,N,opv,desc=knc[i].cl,knc[i].net,knc[i].opval, knc[i].ckey
         xv=gen_features(X,N)       
         #if contains(desc,"KNN")  
         #    y_i=[predict_one(cl,x)[1] for x in xv]
