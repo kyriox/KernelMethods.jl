@@ -702,7 +702,7 @@ function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=
         if debug
             @show (debug, opvali,ckeyi)
         end
-        DNNC[ckey]=(cli,neti)
+        DNNC[ckeyi]=(cli,neti)
     end   
     #for (k,kernel,reftype,distancek,nettype,training) in space
     #    clf_list=genCl()
