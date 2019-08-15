@@ -683,7 +683,7 @@ end
 
 function eval_conf(args)
     c,op_function,Xe,Ye,per_class,test_set,folds,udata=args
-    (cli,neti),(opvali,ckeyi) = eval(training)(Xe,Ye,k,c.nettype,c.kernel,c.distancek,c.reftype,
+    (cli,neti),(opvali,ckeyi) = eval(c.training)(Xe,Ye,k,c.nettype,c.kernel,c.distancek,c.reftype,
     c.clfc, folds=folds,udata=udata, op_function=op_function, per_class=per_class,test_set=test_set)
     (cl=cli, net=neti, opval=opvali, ckey=ckeyi)
 end
