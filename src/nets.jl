@@ -698,11 +698,11 @@ function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=
         cln,dkn,cldn=clfc[2],clfc[3],clfc[4]
         (cli,neti),(opvali,ckeyi)=eval(training)(Xe,Ye,k,nettype,kernel,distancek,reftype,
         clfc; folds=folds,udata=udata, op_function=op_function, per_class=per_class,test_set=test_set)
-        push!(Top,(opval,ckey))
+        push!(Top,(opvali,ckeyi))
         if debug
-            @show (debug, opval,ckey)
+            @show (debug, opvali,ckeyi)
         end
-        DNNC[ckey]=(cl,net)
+        DNNC[ckey]=(cli,neti)
     end   
     #for (k,kernel,reftype,distancek,nettype,training) in space
     #    clf_list=genCl()
