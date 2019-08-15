@@ -614,8 +614,8 @@ function genCl()
             end
         end
     end
-    clf_list=[clfs[Random.randperm(length(clfs))][1], (nb.GaussianNB(),"NaiveBayes","ND","NA")]
-    return clfs_list[Random.randperm(length(clf_list))][1]
+    clf_list=[clf[Random.randperm(length(clfs))][1], (nb.GaussianNB(),"NaiveBayes","ND","NA")]
+    return clf_list[Random.randperm(length(clf_list))][1]
 end
 
 
