@@ -682,7 +682,6 @@ function inductive(Xe,Ye,k,nettype,kernel,distancek,reftype,classifier;
 end
 
 function eval_conf(args)
-    @info args
     try
     c,op_function,Xe,Ye,per_class,test_set,folds,udata=args
     (cli,neti),(opvali,ckeyi) = eval(c.training)(Xe,Ye,c.k,c.nettype,c.kernel,c.distancek,c.reftype,
@@ -690,7 +689,7 @@ function eval_conf(args)
     (cl=cli, net=neti, opval=opvali, ckey=ckeyi)
     catch
         @info stacktrace(catch_backtrace())
-        error(args)
+        error(ckeyi)
     end
 end
 
