@@ -687,7 +687,7 @@ end
 function eval_conf(args)
     c,op_function,Xe,Ye,per_class,test_set,folds,udata=args
     @info length(c)
-    @info  "Configuration Inited", c.k, c.kernel, c.reftype,c.distancek,c.nettype,c.training,lenght(c.cl) 
+    @info  "Configuration Inited", c.k, c.kernel, c.reftype,c.distancek,c.nettype,c.training,length(c.cl) 
     @info op_function,length(Xe),length(Ye),per_class,test_set,folds,udata
     #@info c,op_function,Xe,Ye,per_class,test_set,folds,udata
     (cli,neti),(opvali,ckeyi) = eval(c.training)(Xe,Ye,c.k,c.nettype,c.kernel,c.distancek,c.reftype,
