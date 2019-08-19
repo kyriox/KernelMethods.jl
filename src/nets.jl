@@ -696,6 +696,10 @@ function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=
     kernels=[:gaussian,:linear,:cauchy,:sigmoid],test_set=false, debug=false)
     #DNNC=Dict()
     space_temp=genGrid(nets,K=K,kernels=kernels,distancesk=distancesk,sample_size=sample_size,distances=distances)
+    for c in space_tmp
+        @show length(c)
+        @info c.k, c.kernel, c.reftype,c.distancek,c.nettype, c.training
+    end
     space=[(conf,op_function,Xe,Ye,per_class,test_set,folds,udata) for conf in space_temp]
     res=pmap(eval_conf, space)
     sort!(res, by=x->x.opval, rev=true)
