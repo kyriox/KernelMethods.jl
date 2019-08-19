@@ -36,7 +36,7 @@ mutable struct Net
     data::Vector{Vector{Float64}}
     labels::Vector
     #udata::Vector{Vector{Float64}} #unlabeled data
-    udata::Vector #unlabeled data
+    udata::Vector{Vector{Float64}} #Vector of unlabeled data
     references::Vector{Int32}
     partitions::Vector{Int32}
     centers::Vector#{Vector{Float64}}
