@@ -696,7 +696,7 @@ function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=
     kernels=[:gaussian,:linear,:cauchy,:sigmoid],test_set=false, debug=false)
     #DNNC=Dict()
     space_temp=genGrid(nets,K=K,kernels=kernels,distancesk=distancesk,sample_size=sample_size,distances=distances)
-    for c in space_tmp
+    for c in space_temp
         @show length(c)
         @info c.k, c.kernel, c.reftype,c.distancek,c.nettype, c.training
     end
