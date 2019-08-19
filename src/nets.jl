@@ -633,7 +633,8 @@ function genGrid(nets=[:fft_sampling,:kmeans_sampling,:density_sampling,:random_
         reftypes=[:centroids]
         distancesk=[:squared_l2_distance] 
     end
-    space=[(k=k,kernel=kernel,reftype=reftype,distancek=dc,nettype=net,training=training,cl=genCl()) for k in K  for kernel in kernels 
+    space=[(k=k,kernel=kernel,reftype=reftype,distancek=dc,nettype=net,training=training,cl=genCl()) 
+    for k in K  for kernel in kernels 
     for reftype in reftypes for dc in distancesk for net in nets 
     for training in trainings 
     if  net!=:kmeans_sampling || reftype!=:centers || (net==:kmeans_sampling && dc==:squared_l2_distance)]
@@ -693,8 +694,8 @@ function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=
     distancesk=[:angle,:squared_l2_distance],sample_size=128,
     kernels=[:gaussian,:linear,:cauchy,:sigmoid],test_set=false, debug=false)
     #DNNC=Dict()
-    space=genGrid(nets,K=K,kernels=kernels,distancesk=distancesk,sample_size=sample_size,distances=distances)
-    space=[(conf,op_function,Xe,Ye,per_class,test_set,folds,udata) for conf in space]
+    space_temp=genGrid(nets,K=K,kernels=kernels,distancesk=distancesk,sample_size=sample_size,distances=distances)
+    space=[(conf,op_function,Xe,Ye,per_class,test_set,folds,udata) for conf in space_temp]
     res=pmap(eval_conf, space)
     sort!(res, by=x->x.opval, rev=true)
     res[1:top_k]
