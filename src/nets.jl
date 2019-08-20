@@ -692,7 +692,7 @@ function inductive(Xe,Ye,k,nettype,kernel,distancek,reftype,classifier;
 end
 
 function eval_conf(args)
-    c,op_function,Xe,Ye,per_class,test_set,folds,udata=args
+    c,op_function,Xe,Ye,per_class,test_set,folds,udata,debug=args
     #@info length(c)
     #@info  "Configuration Inited", c.k, c.kernel, c.reftype,c.distancek,c.nettype,c.training,length(c.cl) 
     #@info op_function,length(Xe),length(Ye),per_class,test_set,folds,udata
@@ -700,7 +700,9 @@ function eval_conf(args)
     (cli,neti),(opvali,ckeyi) = eval(c.training)(Xe,Ye,c.k,c.nettype,c.kernel,c.distancek,c.reftype,
     c.cl; folds=folds,udata=udata, op_function=op_function, per_class=per_class,test_set=test_set)
     #@info "Configuration Evaluated", c.k, c.kernel, c.reftype,c.distancek,c.nettype,c.training,length(c.cl) 
-    @show opvali, ckeyi
+    if debug
+        @show opvali, ckeyi
+    end
     (cl=cli, net=neti, opval=opvali, ckey=ckeyi)
 end
 
