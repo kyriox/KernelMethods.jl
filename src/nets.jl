@@ -672,11 +672,18 @@ function inductive(Xe,Ye,k,nettype,kernel,distancek,reftype,classifier;
         y_pred=vcat(y_pred,clf.predict(Xv)[:,1])
     end
     @info  "Finished KFOLDS", k,nettype,kernel,distancek,reftype
+    @info  "Starting Final training =========", k,nettype,kernel,distancek,reftype
     opval=eval(op_function)(yr,y_pred)
+    @info  "Building final NET XXXXXXXXXXXXXXXX"
     Nf=Net(Xe,Ye)
     eval(nettype)(Nf,k,kernel=eval(kernel),distance=distancek,reftype=reftype,per_class=per_class)
+    @info  "final NET finished XXXXXXXXXXXXXXXX"
+    @info  "Generating features for full data"
     X=gen_features(Xe,Nf)
+    @info  "features for full data generated"
+    @info  "Fitting final clasifier"
     clf.fit(X,Ye)
+    @info  "final clasifier fitted =============="
     trainratio=1
     traintype="KFolds"
     key="$nettype/$kernel/$distancek/$k/$clt/$reftype/$trainratio/inductive/$distt/$wt/$traintype"
