@@ -656,7 +656,7 @@ function inductive(Xe,Ye,k,nettype,kernel,distancek,reftype,classifier;
     clf,clt,distt,wt=classifier
     y_pred=[]
     yr=[]
-    @info  "Starting KFOLDS", k,nettype,kernel,distancek,reftype
+    #@info  "Starting KFOLDS", k,nettype,kernel,distancek,reftype
     for (ei,vi) in skf.split(Xe,Ye)
         ei,vi=ei.+1,vi.+1
         xt,xv=Xe[ei],Xe[vi]
@@ -671,19 +671,19 @@ function inductive(Xe,Ye,k,nettype,kernel,distancek,reftype,classifier;
         yr=vcat(yr,yv)
         y_pred=vcat(y_pred,clf.predict(Xv)[:,1])
     end
-    @info  "Finished KFOLDS", k,nettype,kernel,distancek,reftype
-    @info  "Starting Final training =========", k,nettype,kernel,distancek,reftype
+    #@info  "Finished KFOLDS", k,nettype,kernel,distancek,reftype
+    #@info  "Starting Final training =========", k,nettype,kernel,distancek,reftype
     opval=eval(op_function)(yr,y_pred)
-    @info  "Building final NET XXXXXXXXXXXXXXXX"
+    #@info  "Building final NET XXXXXXXXXXXXXXXX"
     Nf=Net(Xe,Ye)
     eval(nettype)(Nf,k,kernel=eval(kernel),distance=distancek,reftype=reftype,per_class=per_class)
-    @info  "final NET finished XXXXXXXXXXXXXXXX"
-    @info  "Generating features for full data"
+    #@info  "final NET finished XXXXXXXXXXXXXXXX"
+    #@info  "Generating features for full data"
     X=gen_features(Xe,Nf)
-    @info  "features for full data generated"
-    @info  "Fitting final clasifier"
+    #@info  "features for full data generated"
+    #@info  "Fitting final clasifier"
     clf.fit(X,Ye)
-    @info  "final clasifier fitted =============="
+    #@info  "final clasifier fitted =============="
     trainratio=1
     traintype="KFolds"
     key="$nettype/$kernel/$distancek/$k/$clt/$reftype/$trainratio/inductive/$distt/$wt/$traintype"
@@ -693,13 +693,14 @@ end
 
 function eval_conf(args)
     c,op_function,Xe,Ye,per_class,test_set,folds,udata=args
-    @info length(c)
-    @info  "Configuration Inited", c.k, c.kernel, c.reftype,c.distancek,c.nettype,c.training,length(c.cl) 
-    @info op_function,length(Xe),length(Ye),per_class,test_set,folds,udata
+    #@info length(c)
+    #@info  "Configuration Inited", c.k, c.kernel, c.reftype,c.distancek,c.nettype,c.training,length(c.cl) 
+    #@info op_function,length(Xe),length(Ye),per_class,test_set,folds,udata
     #@info c,op_function,Xe,Ye,per_class,test_set,folds,udata
     (cli,neti),(opvali,ckeyi) = eval(c.training)(Xe,Ye,c.k,c.nettype,c.kernel,c.distancek,c.reftype,
     c.cl; folds=folds,udata=udata, op_function=op_function, per_class=per_class,test_set=test_set)
-    @info "Configuration Evaluated", c.k, c.kernel, c.reftype,c.distancek,c.nettype,c.training,length(c.cl) 
+    #@info "Configuration Evaluated", c.k, c.kernel, c.reftype,c.distancek,c.nettype,c.training,length(c.cl) 
+    @show opvali, ckeyi
     (cl=cli, net=neti, opval=opvali, ckey=ckeyi)
 end
 
@@ -710,7 +711,7 @@ function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=
     #DNNC=Dict()
     space_temp=genGrid(nets,K=K,kernels=kernels,distancesk=distancesk,sample_size=sample_size,distances=distances)
     space=[(conf,op_function,Xe,Ye,per_class,test_set,folds,udata) for conf in space_temp]
-    res=map(eval_conf, space)
+    res=pmap(eval_conf, space)
     sort!(res, by=x->x.opval, rev=true)
     res[1:top_k]
     #(cli,neti),(opvali,ckeyi)=
