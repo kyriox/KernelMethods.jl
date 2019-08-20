@@ -123,6 +123,9 @@ function maxmin(data,centers,ind,index,distance,partitions)::Tuple{Int64,Float64
         dist = (dist<fn.dist) ?  dist : fn.dist
         partitions[fn.objID] = (dist<fn.dist) ? c : partitions[fn.objID]
         if fn.objID!=c
+            if typeof(dist)==Symbol
+                @show dist
+            end
             push!(nindex,fn.objID,convert(Float64, dist))
         end
     end
@@ -710,7 +713,8 @@ function eval_conf(args)
 end
 
 function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=[],
-    nets=[:fft_sampling,:kmeans_sampling,:density_sampling,:random_sampling],K=[4,8,16,32,64],distances=[:angle,:squared_l2_distance],
+    nets=[:fft_sampling,:kmeans_sampling,:density_sampling,:random_sampling],
+    K=[4,8,16,32,64],distances=[:angle,:squared_l2_distance],
     distancesk=[:angle,:squared_l2_distance],sample_size=128,
     kernels=[:gaussian,:linear,:cauchy,:sigmoid],test_set=false, debug=false)
     #DNNC=Dict()
