@@ -13,9 +13,9 @@
 # limitations under the License.
 
 #module Nets
-export Net, fft_sampling, kmeans_sampling, density_sampling, random_sampling, gen_features, KMS
+export Net, fft_sampling, kmeans_sampling, density_sampling, random_sampling, gen_features, KMS, f1m
 #import KernelMethods.Kernels: sigmoid, gaussian, linear, cauchy, poly, quadratic
-using KernelMethods: accuracy, recall, f1
+using KernelMethods: accuracy, recall#, f1
 #import KernelMethods.Supervised: NearNeighborClassifier, optimize!, predict_one, predict_one_proba
 using KernelMethods: NearNeighborClassifier, optimize!, predict_one, predict_one_proba
 using SimilaritySearch: KnnResult, l2_distance, normalize, squared_l2_distance,  hamming_distance, cosine_distance, angle_distance
@@ -91,6 +91,10 @@ function angle(a,b)
     an=normalize(a)
     bn=normalize(b)
     angle_distance(an,bn)
+end
+
+function f1m(y,yp)::Float64
+    return metrics.f1_score(y, yp, average="macro")
 end
 
 function pearson(y,yp)::Float64
@@ -707,7 +711,7 @@ function eval_conf(args)
     c.cl; folds=folds,udata=udata, op_function=op_function, per_class=per_class,test_set=test_set)
     #@info "Configuration Evaluated", c.k, c.kernel, c.reftype,c.distancek,c.nettype,c.training,length(c.cl) 
     if debug
-        @show opvali, ckeyi
+        @show "#########", opvali, ckeyi
     end
     (cl=cli, net=neti, opval=opvali, ckey=ckeyi)
 end
@@ -720,7 +724,7 @@ function KMS(Xe,Ye; op_function=:recall,top_k=15,folds=3,per_class=false, udata=
     #DNNC=Dict()
     space_temp=genGrid(nets,K=K,kernels=kernels,distancesk=distancesk,sample_size=sample_size,distances=distances)
     space=[(conf,op_function,Xe,Ye,per_class,test_set,folds,udata,debug) for conf in space_temp]
-    res=pmap(eval_conf, space)
+    res=map(eval_conf, space)
     sort!(res, by=x->x.opval, rev=true)
     res[1:top_k]
     #(cli,neti),(opvali,ckeyi)=
