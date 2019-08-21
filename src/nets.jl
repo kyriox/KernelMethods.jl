@@ -94,6 +94,7 @@ function angle(a,b)
 end
 
 function f1m(y,yp)::Float64
+    metrics=pyimport("sklearn.metrics")
     return metrics.f1_score(y, yp, average="macro")
 end
 
