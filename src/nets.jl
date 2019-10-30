@@ -81,7 +81,7 @@ end
 
 sigmoid(xo,xm,distance; sigma=1)=1/(1+exp(distance(xo,xm)-sigma))
 
-function cauchy(xo,xm,distance=; sigma=1)
+function cauchy(xo,xm,distance; sigma=1)
     d=distance(xo,xm)
     if d<=1e-6 
         return 1.0
