@@ -60,26 +60,33 @@ Net(data,labels;udata=[])::Net=Net(data,labels,udata,[],[],[],[],[],[],Dict(),Di
 
 ##  Kernel Fucntions
 
-linear(xo,xm;sigma=1,distance=:L2SquaredDistance())=distance(xo,xm)
-
-poly(xo,xm;sigma=1,distance=:L2SquaredDistance(),degree=2)=(sigma*distance(xo,xm)+1)^degree
-
-quadratic(xo,xm;sigma=1,distance=:L2SquaredDistance())=1-distance(xo,xm)^2/(distance(xo,xm)^2+sigma)
-
-maxk(xo,xm;sigma=1,distance=:L2SquaredDistance()) = distance(xo,xm) > sigma ? 1.0 : 0.0
-
-function gaussian(xo,xm; sigma=1,distance=:L2SquaredDistance())
+function linear(xo,xm,distance;sigma=1)::Float64
     d=distance(xo,xm)
-    (d==0 || sigma==0) && return 1.0
-    exp(-d/sigma)
+    return d<=1e-6 ? 0.0 : sigma/d
 end
 
-sigmoid(xo,xm; sigma=1, distance=:L2SquaredDistance())=1/(1+exp(-distance(xo,xm)+sigma))
+poly(xo,xm,distance;sigma=1,degree=2)=(sigma*distance(xo,xm)+1)^degree
 
-function cauchy(xo,xm; sigma=1,distance=:L2SquaredDistance())
+quadratic(xo,xm,distance;sigma=1)=1-distance(xo,xm)^2/(distance(xo,xm)^2+sigma)
+
+maxk(xo,xm,distance;sigma=1) = distance(xo,xm) > sigma ? 1.0 : 0.0
+
+function gaussian(xo,xm,distance; sigma=1)::Float64
     d=distance(xo,xm)
-    (d<=0 || sigma<=0) && return 1.0
-    1/(1+d/sigma)
+    if d<=1e-6 
+        return 1.0
+    end
+    exp(-d^2/sigma^2)
+end
+
+sigmoid(xo,xm,distance; sigma=1)=1/(1+exp(distance(xo,xm)-sigma))
+
+function cauchy(xo,xm,distance=; sigma=1)
+    d=distance(xo,xm)
+    if d<=1e-6 
+        return 1.0
+    end
+    return 1/(1+d^2/sigma^2)
 end
 
 # AUC score
@@ -485,7 +492,8 @@ function gen_features(Xo,N)::Vector{Vector{Float64}}
         for j in 1:nf  
             #@show i,j,length(Xo),length(Xm),length(sigmas),sigmas
             #@show Xo[i],Xm[j],sigmas[j]
-            xd[j]=kernel(Xo[i],Xm[j],sigma=sigmas[j],distance=eval(N.distance))
+            #xd[j]=kernel(Xo[i],Xm[j],sigma=sigmas[j],distance=eval(N.distance))
+            xd[j]=kernel(Xo[i],Xm[j],eval(N.distance),sigma=sigmas[j])
         end
         xd[isnan.(xd)].=0.0
         if typeof(xd)==Symbol
