@@ -71,9 +71,9 @@ quadratic(xo,xm,distance;sigma=1)=1-distance(xo,xm)^2/(distance(xo,xm)^2+sigma)
 
 maxk(xo,xm,distance;sigma=1) = distance(xo,xm) > sigma ? 1.0 : 0.0
 
-function gaussian(xo,xm,distance; sigma=1)::Float64
+funtion gaussian(xo,xm,distance; sigma=1)::Float64
     d=distance(xo,xm)
-    if d<=1e-6 
+    if d<=1e-6
         return 1.0
     end
     exp(-d^2/sigma^2)
