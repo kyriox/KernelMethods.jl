@@ -62,7 +62,7 @@ Net(data,labels;udata=[])::Net=Net(data,labels,udata,[],[],[],[],[],[],Dict(),Di
 
 function linear(xo,xm,distance;sigma=1)::Float64
     d=distance(xo,xm)
-    return d<=1e-6 ? 0.0 : sigma/d
+    return d<=1e-6 ? 1.0 : sigma/d
 end
 
 poly(xo,xm,distance;sigma=1,degree=2)=(sigma*distance(xo,xm)+1)^degree
@@ -71,7 +71,7 @@ quadratic(xo,xm,distance;sigma=1)=1-distance(xo,xm)^2/(distance(xo,xm)^2+sigma)
 
 maxk(xo,xm,distance;sigma=1) = distance(xo,xm) > sigma ? 1.0 : 0.0
 
-funtion gaussian(xo,xm,distance; sigma=1)::Float64
+function gaussian(xo,xm,distance; sigma=1)::Float64
     d=distance(xo,xm)
     if d<=1e-6
         return 1.0
