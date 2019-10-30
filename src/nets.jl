@@ -659,7 +659,7 @@ function genGrid(nets=[:fft_sampling,:kmeans_sampling,:density_sampling,:random_
     if  net!=:kmeans_sampling || reftype!=:centers || (net==:kmeans_sampling && dc==:squared_l2_distance)]
     #if  !(net==:kmeans_sampling  && dc==:angle)]
     #sz = sample_size%2==1 ? trunc(Int,sample_size/2)+1 : trunc(Int,sample_size/2)
-    if length(space)>sample_size #&& sample_size!=-1
+    if length(space)>sample_size && sample_size!=-1
         space=space[Random.randperm(length(space))[1:sample_size]]
     end
     space
