@@ -62,7 +62,7 @@ Net(data,labels;udata=[])::Net=Net(data,labels,udata,[],[],[],[],[],[],Dict(),Di
 
 function linear(xo,xm,distance;sigma=1)::Float64
     d=distance(xo,xm)
-    return d<=1e-6 ? 1.0 : sigma/d
+    return d #<=1e-6 ? 1.0 : sigma/d
 end
 
 poly(xo,xm,distance;sigma=1,degree=2)=(sigma*distance(xo,xm)+1)^degree
@@ -493,7 +493,11 @@ function gen_features(Xo,N)::Vector{Vector{Float64}}
             #@show i,j,length(Xo),length(Xm),length(sigmas),sigmas
             #@show Xo[i],Xm[j],sigmas[j]
             #xd[j]=kernel(Xo[i],Xm[j],sigma=sigmas[j],distance=eval(N.distance))
-            xd[j]=kernel(Xo[i],Xm[j],eval(N.distance),sigma=sigmas[j])
+            dd=N.distance
+            if N.distance==:squared_l2_distance
+                dd=:l2_distance 
+            end
+            xd[j]=kernel(Xo[i],Xm[j],eval(dd),sigma=sigmas[j])
         end
         xd[isnan.(xd)].=0.0
         if typeof(xd)==Symbol
