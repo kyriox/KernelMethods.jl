@@ -76,10 +76,10 @@ function gaussian(xo,xm,distance; sigma=1)::Float64
     if d<=1e-6
         return 1.0
     end
-    exp(-d^2/sigma^2)
+    exp(-d^2/(2*sigma^2))
 end
 
-sigmoid(xo,xm,distance; sigma=1)=1/(1+exp(distance(xo,xm)-sigma))
+sigmoid(xo,xm,distance; sigma=1)=1/(1+exp(-distance(xo,xm)+sigma))
 
 function cauchy(xo,xm,distance; sigma=1)
     d=distance(xo,xm)
@@ -263,6 +263,7 @@ function fft_sampling(N,num_of_centers::Int; distance=:squared_l2_distance, axis
     N.references,N.partitions,N.dists,N.sigmas=gcenters,partitions,dists,sigmas
     ##N.csigmas,N.stats=get_csigmas(N.data,N.centroids,N.partitions,distance=N.distance)
     N.csigmas,N.stats=get_csigmas(fdata,N.centroids,N.partitions,distance=N.distance)
+    #N.sigmas[0]=maximum(N.csigmas)
     ##N.centers,N.centroids=N.data[gcenters],get_centroids(N)
     N.centers,N.centroids=fdata[gcenters],get_centroids(N)
     N.reftype=reftype
@@ -346,6 +347,9 @@ function get_csigmas(data,centroids,partitions;distance=:squared_l2_distance)::T
     refs=[j for j in Set(partitions)]
     sort!(refs)
     df=eval(distance)
+    if distance==:squared_l2_distance
+        df=eval(:l2_distance)
+    end
     csigmas=Vector{Float64}(undef,length(refs))
     for (ii,i) in enumerate(refs)
         ind=[j for (j,l) in enumerate(partitions) if l==i]
@@ -497,6 +501,7 @@ function gen_features(Xo,N)::Vector{Vector{Float64}}
             if N.distance==:squared_l2_distance
                 dd=:l2_distance 
             end
+            if N.
             xd[j]=kernel(Xo[i],Xm[j],eval(dd),sigma=sigmas[j])
         end
         xd[isnan.(xd)].=0.0
