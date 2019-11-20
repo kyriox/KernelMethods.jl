@@ -666,10 +666,12 @@ function genGrid(nets=[:fft_sampling,:kmeans_sampling,:density_sampling,:random_
         reftypes=[:centroids]
         distancesk=[:squared_l2_distance] 
     end
-    space=[(k=k,kernel=kernel,reftype=reftype,distancek=dc,nettype=net,training=training,cl=genCl()) 
+    #space=[(k=k,kernel=kernel,reftype=reftype,distancek=dc,nettype=net,training=training,cl=genCl()) 
+    space=[(k=k,kernel=kernel,reftype=reftype,distancek=dc,nettype=net,training=training,cl=cl) 
     for k in K  for kernel in kernels 
     for reftype in reftypes for dc in distancesk for net in nets 
     for training in trainings 
+    for cl in genCl() 
     if  net!=:kmeans_sampling || reftype!=:centers || (net==:kmeans_sampling && dc==:squared_l2_distance)]
     #if  !(net==:kmeans_sampling  && dc==:angle)]
     #sz = sample_size%2==1 ? trunc(Int,sample_size/2)+1 : trunc(Int,sample_size/2)
