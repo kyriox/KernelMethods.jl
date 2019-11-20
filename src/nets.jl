@@ -630,6 +630,8 @@ function genCl()
     clfs=[]
     nn=pyimport("sklearn.neighbors")
     nb=pyimport("sklearn.naive_bayes")
+    lm=pyimport("sklearn.linear_model")
+    svm=pyimport("sklearn.svm")
     for d in D
         for w in W
             for k in K
@@ -644,7 +646,11 @@ function genCl()
         end
     end
     clf_list=[clfs[Random.randperm(length(clfs))][1], (nb.GaussianNB(),"NaiveBayes","ND","NA")]
-    return clf_list[Random.randperm(length(clf_list))][1]
+    push!(clf_list,(lm.RidgeClassifier(),"Ridge","ND","NA"))
+    push!(clf_list,(lm.LogisticRegression(),"Logistic","ND","NA"))
+    push!(clf_list,(svm.LinearSVC(),"SVM","ND","NA"))
+    return clf_list
+    #return clf_list[Random.randperm(length(clf_list))][1]
 end
 
 
