@@ -79,7 +79,7 @@ function gaussian(xo,xm,distance; sigma=1)::Float64
     exp(-d^2/(2*sigma^2))
 end
 
-sigmoid(xo,xm,distance; sigma=1)=1/(1+exp(-distance(xo,xm)+sigma))
+sigmoid(xo,xm,distance; sigma=1)=1/(1+exp(distance(xo,xm)-sigma))
 
 function cauchy(xo,xm,distance; sigma=1)
     d=distance(xo,xm)
@@ -501,7 +501,6 @@ function gen_features(Xo,N)::Vector{Vector{Float64}}
             if N.distance==:squared_l2_distance
                 dd=:l2_distance 
             end
-            if N.
             xd[j]=kernel(Xo[i],Xm[j],eval(dd),sigma=sigmas[j])
         end
         xd[isnan.(xd)].=0.0
