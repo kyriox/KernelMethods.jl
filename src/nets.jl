@@ -644,7 +644,8 @@ function genCl()
             end
         end
     end
-    clf_list=[clfs[Random.randperm(length(clfs))][1], (nb.GaussianNB(),"NaiveBayes","ND","NA")]
+    #clf_list=[clfs[Random.randperm(length(clfs))][1], (nb.GaussianNB(),"NaiveBayes","ND","NA")]
+    clf_list=push(clfs,(nb.GaussianNB(),"NaiveBayes","ND","NA"))
     push!(clf_list,(lm.RidgeClassifier(),"Ridge","ND","NA"))
     push!(clf_list,(lm.LogisticRegression(),"Logistic","ND","NA"))
     push!(clf_list,(svm.LinearSVC(),"SVM","ND","NA"))
